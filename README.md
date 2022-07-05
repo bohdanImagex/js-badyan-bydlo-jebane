@@ -1,1 +1,1 @@
-# js-badyan-bydlo-jebane test
+# Сам ти підар йобаний
