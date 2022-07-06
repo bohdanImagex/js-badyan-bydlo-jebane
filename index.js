@@ -9,31 +9,30 @@
 
 (function (){
   const pagination = {
-
+    page: 1,
+    per_page: 2,
+    total: document.getElementById('total'),
+    total_count: 0,
+    page_number_span: document.getElementById('page-number'),
+    page_number: 1,
+    btn_next: document.getElementById('btn_next'),
+    btn_prev: document.getElementById('btn_prev'),
+    url: 'https://reqres.in/api/users?'
   }
-  let page = 1;
-  let per_page = 2;
-  let total = document.getElementById('total');
-  let total_count = 0;
-  let page_number_span = document.getElementById('page-number');
-  let page_number = 1
-  let btn_next = document.getElementById('btn_next');
-  let btn_prev = document.getElementById('btn_prev');
-  const url = 'https://reqres.in/api/users?';
 
 // Send request and work with data.
   function load() {
-    fetch(url + new URLSearchParams({
-      page: page,
-      per_page: per_page,
+    fetch(pagination.url + new URLSearchParams({
+      page: pagination.page,
+      per_page: pagination.per_page,
     }))
         .then(function (respose) {
           return respose.json()
         })
         .then(function (responseData) {
-          total_count = responseData.total;
+          pagination.total_count = responseData.total;
           // Render total results.
-          total.innerHTML = `${per_page} of ${responseData.total} Records`;
+          pagination.total.innerHTML = `${pagination.per_page} of ${responseData.total} Records`;
 
           let result = document.querySelector('#result');
           // Clear result.
@@ -53,18 +52,18 @@
 
 
   function numPages() {
-    return Math.ceil(total_count / per_page);
+    return Math.ceil(pagination.total_count / pagination.per_page);
   }
 
   // Set number of page.
   function setPageNumber(page_number) {
-    page_number_span.innerHTML = page_number;
+    pagination.page_number_span.innerHTML = page_number;
 
     // Hide Prev button if we are on the first page.
-    btn_prev.style.visibility = page_number === 1 ? 'hidden' : 'visible';
+    pagination.btn_prev.style.visibility = page_number === 1 ? 'hidden' : 'visible';
 
     // Hide Next button if we are on the last page.
-    btn_next.style.visibility = page_number === numPages() ? 'hidden' : 'visible';
+    pagination.btn_next.style.visibility = page_number === numPages() ? 'hidden' : 'visible';
   }
 
 
@@ -72,7 +71,7 @@
 // Load first result and set page number when page is loaded.
   document.addEventListener('DOMContentLoaded', function () {
     load();
-    setPageNumber(page_number);
+    setPageNumber(pagination.page_number);
   })
 
 
@@ -83,20 +82,20 @@
   });
 
 // Click on the Next button.
-  btn_next.addEventListener('click', function () {
+  pagination.btn_next.addEventListener('click', function () {
     event.preventDefault();
-    page++
-    page_number++
-    setPageNumber(page_number)
+    pagination.page++
+    pagination.page_number++
+    setPageNumber(pagination.page_number)
     load()
   });
 
 // Click on the Prev button.
-  btn_prev.addEventListener('click', function () {
+  pagination.btn_prev.addEventListener('click', function () {
     event.preventDefault();
-    page--
-    page_number--
-    setPageNumber(page_number)
+    pagination.page--
+    pagination.page_number--
+    setPageNumber(pagination.page_number)
     load()
   })
 })()
