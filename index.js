@@ -15,8 +15,8 @@
     totalCount: 0,
     pageNumberSpan: document.getElementById('page-number'),
     pageNumber: 1,
-    btnNext: document.getElementById('btnNext'),
-    btnPrev: document.getElementById('btnPrev'),
+    btnNext: document.getElementById('btn_next'),
+    btnPrev: document.getElementById('btn_prev'),
     url: 'https://reqres.in/api/users?'
   }
 
@@ -24,7 +24,7 @@
   function load() {
     fetch(pagination.url + new URLSearchParams({
       page: pagination.page,
-      perPage: pagination.perPage,
+      per_page: pagination.perPage,
     }))
         .then(function (respose) {
           return respose.json()
