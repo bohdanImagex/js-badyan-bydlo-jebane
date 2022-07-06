@@ -10,13 +10,13 @@
 (function (){
   const pagination = {
     page: 1,
-    per_page: 2,
+    perPage: 2,
     total: document.getElementById('total'),
-    total_count: 0,
-    page_number_span: document.getElementById('page-number'),
-    page_number: 1,
-    btn_next: document.getElementById('btn_next'),
-    btn_prev: document.getElementById('btn_prev'),
+    totalCount: 0,
+    pageNumberSpan: document.getElementById('page-number'),
+    pageNumber: 1,
+    btnNext: document.getElementById('btnNext'),
+    btnPrev: document.getElementById('btnPrev'),
     url: 'https://reqres.in/api/users?'
   }
 
@@ -24,24 +24,24 @@
   function load() {
     fetch(pagination.url + new URLSearchParams({
       page: pagination.page,
-      per_page: pagination.per_page,
+      perPage: pagination.perPage,
     }))
         .then(function (respose) {
           return respose.json()
         })
         .then(function (responseData) {
-          pagination.total_count = responseData.total;
+          pagination.totalCount = responseData.total;
           // Render total results.
-          pagination.total.innerHTML = `${pagination.per_page} of ${responseData.total} Records`;
+          pagination.total.innerHTML = `${pagination.perPage} of ${responseData.total} Records`;
 
-          let result = document.querySelector('#result');
+          const result = document.querySelector('#result');
           // Clear result.
           result.innerHTML = ""
 
           // load responce data.
-          let data = responseData.data
+          const data = responseData.data
 
-          let html = data.map(function(item) {
+          const html = data.map(function(item) {
             // here we need to generate html for object.
             return `<div class="user-info"><div class="user-first-name">${item.first_name}</div><div class="user-last-name">${item.last_name}</div><div class="user-email">${item.email}</div><div class="user-avatar"><img src="${item.avatar}"></div></div>`
           })
@@ -52,18 +52,18 @@
 
 
   function numPages() {
-    return Math.ceil(pagination.total_count / pagination.per_page);
+    return Math.ceil(pagination.totalCount / pagination.perPage);
   }
 
   // Set number of page.
-  function setPageNumber(page_number) {
-    pagination.page_number_span.innerHTML = page_number;
+  function setPageNumber(pageNumber) {
+    pagination.pageNumberSpan.innerHTML = pageNumber;
 
     // Hide Prev button if we are on the first page.
-    pagination.btn_prev.style.visibility = page_number === 1 ? 'hidden' : 'visible';
+    pagination.btnPrev.style.visibility = pageNumber === 1 ? 'hidden' : 'visible';
 
     // Hide Next button if we are on the last page.
-    pagination.btn_next.style.visibility = page_number === numPages() ? 'hidden' : 'visible';
+    pagination.btnNext.style.visibility = pageNumber === numPages() ? 'hidden' : 'visible';
   }
 
 
@@ -71,31 +71,31 @@
 // Load first result and set page number when page is loaded.
   document.addEventListener('DOMContentLoaded', function () {
     load();
-    setPageNumber(pagination.page_number);
+    setPageNumber(pagination.pageNumber);
   })
 
 
-// Get per_page value from the select.
+// Get perPage value from the select.
   document.getElementById('page-size').addEventListener('change', function() {
-    per_page = this.value
+    pagination.perPage = this.value
     load()
   });
 
 // Click on the Next button.
-  pagination.btn_next.addEventListener('click', function () {
+  pagination.btnNext.addEventListener('click', function () {
     event.preventDefault();
     pagination.page++
-    pagination.page_number++
-    setPageNumber(pagination.page_number)
+    pagination.pageNumber++
+    setPageNumber(pagination.pageNumber)
     load()
   });
 
 // Click on the Prev button.
-  pagination.btn_prev.addEventListener('click', function () {
+  pagination.btnPrev.addEventListener('click', function () {
     event.preventDefault();
     pagination.page--
-    pagination.page_number--
-    setPageNumber(pagination.page_number)
+    pagination.pageNumber--
+    setPageNumber(pagination.pageNumber)
     load()
   })
 })()
