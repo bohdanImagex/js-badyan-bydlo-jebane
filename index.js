@@ -21,34 +21,29 @@
   }
 
 // Send request and work with data.
-  function load() {
-    fetch(pagination.url + new URLSearchParams({
-      page: pagination.page,
-      per_page: pagination.perPage,
-    }))
-        .then(function (respose) {
-          return respose.json()
-        })
-        .then(function (responseData) {
-          pagination.totalCount = responseData.total;
-          // Render total results.
-          pagination.total.innerHTML = `${pagination.perPage} of ${responseData.total} Records`;
+async function load() {
+  const response = await fetch(pagination.url + new URLSearchParams({
+    page: pagination.page,
+    per_page: pagination.perPage,
+  }));
+  const responseData = await response.json();
+  pagination.totalCount = responseData.total;
+  // Render total results.
+  pagination.total.innerHTML = `${pagination.perPage} of ${responseData.total} Records`;
 
-          const result = document.querySelector('#result');
-          // Clear result.
-          result.innerHTML = ""
+  const result = document.querySelector('#result');
+  // Clear result.
+  result.innerHTML = ""
 
-          // load responce data.
-          const data = responseData.data
+  // load responce data.
+  const data = responseData.data
+  const html = data.map(function(item) {
+    // here we need to generate html for object.
+    return `<div class="user-info"><div class="user-first-name">${item.first_name}</div><div class="user-last-name">${item.last_name}</div><div class="user-email">${item.email}</div><div class="user-avatar"><img src="${item.avatar}"></div></div>`
+  })
 
-          const html = data.map(function(item) {
-            // here we need to generate html for object.
-            return `<div class="user-info"><div class="user-first-name">${item.first_name}</div><div class="user-last-name">${item.last_name}</div><div class="user-email">${item.email}</div><div class="user-avatar"><img src="${item.avatar}"></div></div>`
-          })
-
-          result.insertAdjacentHTML('afterbegin', html.join(''))
-        })
-  }
+  result.insertAdjacentHTML('afterbegin', html.join(''))
+}
 
 
   function numPages() {
