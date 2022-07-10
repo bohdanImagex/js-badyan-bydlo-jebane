@@ -1,8 +1,8 @@
 /**
- * Винести змінні які ти мутуєш в окремий об'єкт як ключі
- * Пройтись по змінних і замінити let на const у місцях де це можливо
- * Змінні в camelCase
- * DRY principle: накнайменше дублікацій коду
+ * Винести змінні які ти мутуєш в окремий об'єкт як ключі +
+ * Пройтись по змінних і замінити let на const у місцях де це можливо +
+ * Змінні в camelCase +
+ * DRY principle: накнайменше дублікацій коду +
  * Переписати проміси на async/await
  * */
 
@@ -66,7 +66,23 @@
     pagination.btnNext.style.visibility = pageNumber === numPages() ? 'hidden' : 'visible';
   }
 
+  function setPageLoad() {
+    setPageNumber(pagination.pageNumber);
+    load();
+  }
 
+  function paginationClick(btnType) {
+    if (btnType === 'next') {
+      pagination.page++;
+      pagination.pageNumber++;
+      setPageLoad();
+    }
+    else if (btnType === 'prev') {
+      pagination.page--;
+      pagination.pageNumber--;
+      setPageLoad();
+    }
+  }
 
 // Load first result and set page number when page is loaded.
   document.addEventListener('DOMContentLoaded', function () {
@@ -82,20 +98,14 @@
   });
 
 // Click on the Next button.
-  pagination.btnNext.addEventListener('click', function () {
+  pagination.btnNext.addEventListener('click', function (event) {
     event.preventDefault();
-    pagination.page++
-    pagination.pageNumber++
-    setPageNumber(pagination.pageNumber)
-    load()
+    paginationClick('next')
   });
 
 // Click on the Prev button.
-  pagination.btnPrev.addEventListener('click', function () {
+  pagination.btnPrev.addEventListener('click', function (event) {
     event.preventDefault();
-    pagination.page--
-    pagination.pageNumber--
-    setPageNumber(pagination.pageNumber)
-    load()
+    paginationClick('prev')
   })
 })()
