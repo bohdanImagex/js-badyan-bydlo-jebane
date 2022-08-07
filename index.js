@@ -20,13 +20,13 @@
 
 // Send request and work with data.
   async function load() {
-    const fetchURL = API_URL + new URLSearchParams({page: currentPage, per_page: perPage,});
+    const fetchURL = API_URL + new URLSearchParams({page: currentPage, per_page: perPage});
     const response = await fetch(fetchURL);
     const responseData = await response.json();
     const { total, data } = responseData;
     pagination.totalCount = total;
     // Render total results.
-    totalElement.innerHTML = `${perPage} of ${responseData.total} Records`;
+    totalElement.innerHTML = buildTotalElement(perPage, currentPage, responseData.total);
 
     const result = document.querySelector('#result');
     // Clear result.
@@ -43,7 +43,18 @@
     result.insertAdjacentHTML('afterbegin', html.join(''))
 }
 
-// оце не робить курва.
+  // Build result text for the pagination.
+  function buildTotalElement(perPage, currentPage, total) {
+    if (currentPage === 1) {
+      return `1 - ${perPage} of ${total} Records`;
+    }
+    else {
+      let secondElement = perPage * currentPage;
+      let firstElement = secondElement - perPage;
+      return `${firstElement} - ${secondElement} of ${total} Records`;
+    }
+  }
+
   function numPages() {
     return Math.ceil(pagination.totalCount / perPage);
   }
@@ -70,7 +81,7 @@
       // Set new GET parameters.
       urlParams.set('current_page', currentPage);
       urlParams.set('per_page', perPage);
-      sendData(urlParams)
+      sendData(urlParams);
     }
     else if (btnType === BUTTON_TYPES.PREV) {
       currentPage--;
@@ -78,7 +89,7 @@
       // Set new GET parameters.
       urlParams.set('current_page', currentPage);
       urlParams.set('per_page', perPage);
-      sendData(urlParams)
+      sendData(urlParams);
     }
   }
 
@@ -91,28 +102,28 @@
 
 // Get perPage value from the select.
   document.getElementById('page-size').addEventListener('change', function() {
-    perPage = this.value
+    perPage = this.value;
     urlParams.set('per_page', perPage);
-    sendData(urlParams)
-    load()
+    sendData(urlParams);
+    load();
   });
 
 // Click on the Next button.
   btnNext.addEventListener('click', function (event) {
     event.preventDefault();
-    handlePaginationButtonClick('next')
+    handlePaginationButtonClick('next');
   });
 
 
   function sendData(urlParams) {
     // Replace get parameters in browser.
-    window.history.replaceState(null, null, `?${urlParams.toString()}`)
+    window.history.replaceState(null, null, `?${urlParams.toString()}`);
   }
 
 
 // Click on the Prev button.
   btnPrev.addEventListener('click', function (event) {
     event.preventDefault();
-    handlePaginationButtonClick('prev')
+    handlePaginationButtonClick('prev');
   })
 })()
