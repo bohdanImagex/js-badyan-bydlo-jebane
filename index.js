@@ -1,102 +1,129 @@
-/**
- * Винести змінні які ти мутуєш в окремий об'єкт як ключі
- * Пройтись по змінних і замінити let на const у місцях де це можливо
- * Змінні в camelCase
- * DRY principle: накнайменше дублікацій коду
- * Переписати проміси на async/await
- * */
-
-
 (function (){
-  const pagination = {
-
+  const API_URL = 'https://reqres.in/api/users?';
+  const totalElement = document.getElementById('total');
+  const pageNumberElement = document.getElementById('page-number');
+  const urlParams = new URLSearchParams(window.location.search);
+  const btnNext = document.getElementById('btn_next');
+  const btnPrev = document.getElementById('btn_prev');
+  const BUTTON_TYPES = {
+    PREV: 'prev',
+    NEXT: 'next',
   }
-  let page = 1;
-  let per_page = 2;
-  let total = document.getElementById('total');
-  let total_count = 0;
-  let page_number_span = document.getElementById('page-number');
-  let page_number = 1
-  let btn_next = document.getElementById('btn_next');
-  let btn_prev = document.getElementById('btn_prev');
-  const url = 'https://reqres.in/api/users?';
+  const pagination = {
+    page: 1,
+    perPage: 2,
+    totalCount: 12,
+    pageNumber: 1,
+  }
+  let currentPage = urlParams.get('current_page') ?? pagination.page;
+  let perPage = urlParams.get('per_page') ?? pagination.perPage;
 
 // Send request and work with data.
-  function load() {
-    fetch(url + new URLSearchParams({
-      page: page,
-      per_page: per_page,
-    }))
-        .then(function (respose) {
-          return respose.json()
-        })
-        .then(function (responseData) {
-          total_count = responseData.total;
-          // Render total results.
-          total.innerHTML = `${per_page} of ${responseData.total} Records`;
+  async function load() {
+    const fetchURL = API_URL + new URLSearchParams({page: currentPage, per_page: perPage});
+    const response = await fetch(fetchURL);
+    const responseData = await response.json();
+    const { total, data } = responseData;
+    pagination.totalCount = total;
+    // Render total results.
+    totalElement.innerHTML = buildTotalElement(perPage, currentPage, responseData.total);
 
-          let result = document.querySelector('#result');
-          // Clear result.
-          result.innerHTML = ""
+    const result = document.querySelector('#result');
+    // Clear result.
+    result.innerHTML = ""
 
-          // load responce data.
-          let data = responseData.data
+    // separate function for getting the HTML.
+    const createUsersHTMLFromData = (usersData) => `<div class="user-info"><div class="user-first-name">${usersData.first_name}</div><div class="user-last-name">${usersData.last_name}</div><div class="user-email">${usersData.email}</div><div class="user-avatar"><img src="${usersData.avatar}"></div></div>`;
 
-          let html = data.map(function(item) {
-            // here we need to generate html for object.
-            return `<div class="user-info"><div class="user-first-name">${item.first_name}</div><div class="user-last-name">${item.last_name}</div><div class="user-email">${item.email}</div><div class="user-avatar"><img src="${item.avatar}"></div></div>`
-          })
+    const html = data.map(function(usersData) {
+      // here we need to generate html for object.
+      return createUsersHTMLFromData(usersData);
+    })
 
-          result.insertAdjacentHTML('afterbegin', html.join(''))
-        })
+    result.insertAdjacentHTML('afterbegin', html.join(''))
+}
+
+  // Build result text for the pagination.
+  function buildTotalElement(perPage, currentPage, total) {
+    if (currentPage === 1) {
+      return `1 - ${perPage} of ${total} Records`;
+    }
+    else {
+      let secondElement = perPage * currentPage;
+      let firstElement = secondElement - perPage;
+      return `${firstElement} - ${secondElement} of ${total} Records`;
+    }
   }
 
-
   function numPages() {
-    return Math.ceil(total_count / per_page);
+    return Math.ceil(pagination.totalCount / perPage);
   }
 
   // Set number of page.
-  function setPageNumber(page_number) {
-    page_number_span.innerHTML = page_number;
+  function setPageNumber(pageNumber) {
+    pageNumberElement.innerHTML = pageNumber;
 
     // Hide Prev button if we are on the first page.
-    btn_prev.style.visibility = page_number === 1 ? 'hidden' : 'visible';
+    btnPrev.style.visibility = pageNumber == 1 ? 'hidden' : 'visible';
 
-    // Hide Next button if we are on the last page.
-    btn_next.style.visibility = page_number === numPages() ? 'hidden' : 'visible';
+    btnNext.style.visibility = pageNumber == numPages() ? 'hidden' : 'visible';
   }
 
+  function setPageLoad() {
+    load();
+    setPageNumber(currentPage);
+  }
 
+  function handlePaginationButtonClick(btnType) {
+    if (btnType === BUTTON_TYPES.NEXT) {
+      currentPage++
+      setPageLoad();
+      // Set new GET parameters.
+      urlParams.set('current_page', currentPage);
+      urlParams.set('per_page', perPage);
+      sendData(urlParams);
+    }
+    else if (btnType === BUTTON_TYPES.PREV) {
+      currentPage--;
+      setPageLoad();
+      // Set new GET parameters.
+      urlParams.set('current_page', currentPage);
+      urlParams.set('per_page', perPage);
+      sendData(urlParams);
+    }
+  }
 
 // Load first result and set page number when page is loaded.
   document.addEventListener('DOMContentLoaded', function () {
     load();
-    setPageNumber(page_number);
+    setPageNumber(currentPage);
   })
 
 
-// Get per_page value from the select.
+// Get perPage value from the select.
   document.getElementById('page-size').addEventListener('change', function() {
-    per_page = this.value
-    load()
+    perPage = this.value;
+    urlParams.set('per_page', perPage);
+    sendData(urlParams);
+    load();
   });
 
 // Click on the Next button.
-  btn_next.addEventListener('click', function () {
+  btnNext.addEventListener('click', function (event) {
     event.preventDefault();
-    page++
-    page_number++
-    setPageNumber(page_number)
-    load()
+    handlePaginationButtonClick('next');
   });
 
+
+  function sendData(urlParams) {
+    // Replace get parameters in browser.
+    window.history.replaceState(null, null, `?${urlParams.toString()}`);
+  }
+
+
 // Click on the Prev button.
-  btn_prev.addEventListener('click', function () {
+  btnPrev.addEventListener('click', function (event) {
     event.preventDefault();
-    page--
-    page_number--
-    setPageNumber(page_number)
-    load()
+    handlePaginationButtonClick('prev');
   })
 })()
